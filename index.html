@@ -7,7 +7,7 @@
 <script src="src/brain.js"></script>
 <script>
 
-  var fnn = new FastNeuralNetwork([4,16000,5000]);
+  var fnn = new FastNeuralNetwork([4,16000,10000]);
  
   //load model
   fnn.load(model);
@@ -34,11 +34,11 @@
 
    function test(){
      
-   
+    console.time('test');
+
     p = (fnn.predict(itensor));
      
-
-   console.log("done")
+    console.timeEnd('test');
 
    }
 

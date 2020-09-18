@@ -30,7 +30,7 @@ class FastNeuralNetwork {
         var __olayer_bias__ = this.bias[1];
 
 
-        const sfmx_reduce = this.__gpu.createKernel(function (_i, mp, _o_rows) {
+        const sfmxReduce = this.__gpu.createKernel(function (_i, mp, _o_rows) {
             let sum = 0;
             let d = 0;
             let thisMpValue = mp[this.thread.z][0][0];
@@ -43,7 +43,7 @@ class FastNeuralNetwork {
             return sum;
         }).setOutput([1, __olayer__.rows, __depth__]);
 
-        const sfmx_MaxPoint = this.__gpu.createKernel(function (_i, _o_rows) {
+        const sfmxMaxPoint = this.__gpu.createKernel(function (_i, _o_rows) {
             let sum = 0;
             let mp = 0;
             for (let i = 0; i < _o_rows; i++) {
@@ -56,7 +56,7 @@ class FastNeuralNetwork {
             return sum;
         }).setOutput([1, 1, __depth__]);
 
-        const hlayerCompute = this.__gpu.createKernel(function (_i, _h, _b, _h_cols) {
+        const hLayerCompute = this.__gpu.createKernel(function (_i, _h, _b, _h_cols) {
             let sum = _b[this.thread.y][this.thread.x];
             for (let i = 0; i < _h_cols; i++) {
                 sum += _i[this.thread.z][i][this.thread.x] * _h[this.thread.y][i];
@@ -65,7 +65,7 @@ class FastNeuralNetwork {
             return sum;
         }).setOutput([1, __hlayer__.rows, __depth__]);
 
-        const olayerCompute = this.__gpu.createKernel(function (_i, _h, _b, _h_cols) {
+        const oLayerCompute = this.__gpu.createKernel(function (_i, _h, _b, _h_cols) {
             let sum = _b[this.thread.y][this.thread.x];
             for (let i = 0; i < _h_cols; i++) {
                 sum += _i[this.thread.z][i][this.thread.x] * _h[this.thread.y][i];
@@ -74,17 +74,23 @@ class FastNeuralNetwork {
             return sum;
         }).setOutput([1, __olayer__.rows, __depth__]);
 
-        var h_output = hlayerCompute(inputs, __hlayer__.data, __hlayer_bias__.data, __hlayer__.cols);
-        var o_output = olayerCompute(h_output, __olayer__.data, __olayer_bias__.data, __olayer__.cols);
-        var mp = (sfmx_MaxPoint(o_output, __olayer__.rows))
   
-        var predictions =  (sfmx_reduce(o_output,mp,__olayer__.rows));
+        const kernelProc = this.__gpu.combineKernels(hLayerCompute, oLayerCompute,sfmxMaxPoint,sfmxReduce, 
+            function(_i, _h, _b, _h_cols, _o_h, _o_b, _o_h_cols,_o_h_rows) {      
+            var h_output = hLayerCompute(_i, _h, _b, _h_cols);
+            var o_output = oLayerCompute(h_output, _o_h, _o_b,_o_h_cols);
+            var mp = (sfmxMaxPoint(o_output, _o_h_rows));
+            return sfmxReduce(o_output,mp,_o_h_rows);
+
+        });
+
+        var predictions =  kernelProc(inputs, __hlayer__.data, __hlayer_bias__.data, __hlayer__.cols, __olayer__.data, __olayer_bias__.data, __olayer__.cols,__olayer__.rows);
 
         //destroy all kernels
-        hlayerCompute.destroy();
-        olayerCompute.destroy();
-        sfmx_MaxPoint.destroy();
-        sfmx_reduce.destroy();
+        hLayerCompute.destroy();
+        oLayerCompute.destroy();
+        sfmxMaxPoint.destroy();
+        sfmxReduce.destroy();
 
         return predictions;
 
