@@ -1,0 +1,48 @@
+<button onclick="test()">click</button>
+<script src="https://unpkg.com/gpu.js@latest/dist/gpu-browser.min.js"></script>
+<script src="src/matrix.js"></script>
+<script src="src/fnn.js"></script>
+<script src="src/loader.js"></script>
+<script src="src/iris.js"></script>
+<script src="src/brain.js"></script>
+<script>
+
+  var fnn = new FastNeuralNetwork([4,16000,5000]);
+ 
+  //load model
+  fnn.load(model);
+
+  var loader = new Loader(iris);
+
+    prepraredDataset = loader.prepareData({
+        className: "species",
+    });
+
+    prepraredDataset = loader.mixed(prepraredDataset);
+    prepraredDataset = loader.makeValidationData(
+        prepraredDataset,
+        0
+    );
+
+    var inputs = prepraredDataset.trainDs.map(x => x.Feature);
+  
+    var itensor = (fnn.to3dTensor(inputs))
+
+
+    var p = (fnn.predict(itensor));
+
+
+   function test(){
+     
+   
+    p = (fnn.predict(itensor));
+     
+
+   console.log("done")
+
+   }
+
+    
+
+
+</script>
