@@ -149,5 +149,5 @@ var iris = [
     {"sepal_length":6.3,"sepal_width":2.5,"petal_length":5,"petal_width":1.9,"species":"virginica"},
     {"sepal_length":6.5,"sepal_width":3,"petal_length":5.2,"petal_width":2,"species":"virginica"},
     {"sepal_length":6.2,"sepal_width":3.4,"petal_length":5.4,"petal_width":2.3,"species":"virginica"},
-    {"sepal_length":5.9,"sepal_width":3,"petal_length":5.1,"petal_width":1.8,"species":"virginica"}
+    {"sepal_length":5.9,"sepal_width":3,"petal_length":5.1,"petal_width":1.8,"species":"virginica"}, 
 ];

@@ -79,7 +79,7 @@ class Loader {
     output.forEach(function (data) {
       data.LabelName = data.Label;
       data.Label = new Array(_classes.length).fill(0).map(function (x, i) {
-        return i == _classes.indexOf(data.Label) ? 1 : x;
+        return i == _classes.indexOf(data.Label) ? [1] : [x];
       });
     });
       this.classes = _classes;
